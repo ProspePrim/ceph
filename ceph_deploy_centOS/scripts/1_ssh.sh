@@ -17,7 +17,7 @@ Host ceph-node-2
 
 Host ceph-node-3
         Hostname root
-        User vagrant
+        User root
 EOF
 
 chmod 600 ~/.ssh/config
