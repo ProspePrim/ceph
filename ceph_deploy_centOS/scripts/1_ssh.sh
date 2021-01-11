@@ -16,7 +16,7 @@ Host ceph-node-2
         User root
 
 Host ceph-node-3
-        Hostname root
+        Hostname ceph-node-3
         User root
 EOF
 
