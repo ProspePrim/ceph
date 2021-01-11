@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 echo "[TASK 1]  Add update the package sources"
 sudo rpm --import 'https://download.ceph.com/keys/release.asc'

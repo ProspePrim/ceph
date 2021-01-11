@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 mkdir ~/grafana_prom
 cd ~/grafana_prom
