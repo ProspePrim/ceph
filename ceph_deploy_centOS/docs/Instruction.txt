@@ -1,0 +1,322 @@
+#!/bin/bash
+
+echo "[TASK 1]  ssh-keygen"
+
+ssh-keygen
+
+###
+
+echo "[TASK 2]  ssh-config"
+
+cat >>~/.ssh/config<<EOF
+Host ceph-node-1
+        Hostname ceph-node-1
+        User root
+
+Host ceph-node-2
+        Hostname ceph-node-2
+        User root
+
+Host ceph-node-3
+        Hostname root
+        User vagrant
+EOF
+
+chmod 600 ~/.ssh/config
+
+###
+
+echo "[TASK 3]  ssh-copy-id"
+ssh-copy-id root@ceph-node-1 
+ssh-copy-id root@ceph-node-2
+ssh-copy-id root@ceph-node-3
+
+echo "[TASK 4]  Add update the package sources"
+sudo rpm --import 'https://download.ceph.com/keys/release.asc'
+
+###
+
+echo "[TASK 5]  Add update the package sources"
+
+cat >>/etc/yum.repos.d/ceph.repo<<EOF
+[ceph]
+name=Ceph packages for $basearch
+baseurl=https://download.ceph.com/rpm-nautilus/el7/$basearch
+enabled=1
+priority=2
+gpgcheck=1
+gpgkey=https://download.ceph.com/keys/release.asc
+
+[ceph-noarch]
+name=Ceph noarch packages
+baseurl=https://download.ceph.com/rpm-nautilus/el7//noarch
+enabled=1
+priority=2
+gpgcheck=1
+gpgkey=https://download.ceph.com/keys/release.asc
+
+[ceph-source]
+name=Ceph source packages
+baseurl=https://download.ceph.com/rpm-nautilus/el7/SRPMS
+enabled=0
+priority=2
+gpgcheck=1
+gpgkey=https://download.ceph.com/keys/release.asc
+EOF
+
+###
+
+echo "[TASK 6]  Create dir ceph-deploy"
+
+mkdir ~/ceph-deploy
+
+cd ~/ceph-deploy
+
+###
+
+echo "[TASK 7]  Install Ceph-Deploy"
+
+sudo yum install ceph-deploy
+
+###
+
+echo "[TASK 8] Start to create the cluster
+
+ceph-deploy new ceph-node-1 ceph-node-2 ceph-node-3
+
+###
+
+echo "[TASK 9] Install Ceph packages"
+
+ceph-deploy install --release nautilus ceph-node-1 ceph-node-2 ceph-node-3
+
+###
+
+echo "[TASK 10] Deploy the initial monitor(s) and gather the keys"
+
+ceph-deploy mon create-initial
+
+###
+
+echo "[TASK 11] Copy the configuration file and admin key to your admin node and your Ceph Nodes"
+
+ceph-deploy admin ceph-node-1 ceph-node-2 ceph-node-3
+
+###
+
+echo "[TASK 12] Deploy a manager daemon"
+
+ceph-deploy mgr create ceph-node-1
+
+###
+
+echo "[TASK 13] create metadata servers"
+
+ceph-deploy mds create ceph-node-1 ceph-node-2 ceph-node-3
+
+###
+
+echo "[TASK 14] Create Object Store Daemons (OSDs)"
+
+ceph-deploy osd create --data /dev/sdb ceph-node-1
+ceph-deploy osd create --data /dev/sdb ceph-node-2
+ceph-deploy osd create --data /dev/sdb ceph-node-3
+
+###
+
+echo "[TASK 15] Check status"
+
+ceph -s
+
+###
+
+echo "[TASK 16] Installing prometheus"
+
+sudo wget https://github.com/prometheus/prometheus/releases/download/v2.8.1/prometheus-2.8.1.linux-amd64.tar.gz
+
+###
+
+echo "[TASK 17] Add a Prometheus user"
+
+sudo useradd --no-create-home --shell /bin/false prometheus
+
+###
+
+echo "[TASK 18] Create /etc/prometheus and /var/lib/prometheus directories"
+
+sudo mkdir /etc/prometheus
+sudo mkdir /var/lib/prometheus
+
+echo "[TASK 19] Change the owner of the above directories"
+
+sudo chown prometheus:prometheus /etc/prometheus
+sudo chown prometheus:prometheus /var/lib/prometheus
+
+###
+
+echo "[TASK 20] Now go to Prometheus downloaded location and extract it"
+
+sudo tar -xvzf prometheus-2.8.1.linux-amd64.tar.gz
+
+###
+
+echo " [TASK 21] Rename it as per your preference"
+
+sudo mv prometheus-2.8.1.linux-amd64 prometheuspackage
+
+###
+
+echo "[TASK 22] Copy “prometheus” and “promtool” binary from the “prometheuspackage” folder to “/usr/local/bin”"
+
+sudo cp prometheuspackage/prometheus /usr/local/bin/
+sudo cp prometheuspackage/promtool /usr/local/bin/
+
+###
+
+echo "[TASK 23] Change the ownership to Prometheus user"
+
+sudo chown prometheus:prometheus /usr/local/bin/prometheus
+sudo chown prometheus:prometheus /usr/local/bin/promtool
+
+###
+
+
+echo "[TASK 24] Change the ownership to Prometheus user"
+
+sudo cp -r prometheuspackage/consoles /etc/prometheus
+sudo cp -r prometheuspackage/console_libraries /etc/prometheus
+
+###
+
+echo "[TASK 25] Create the prometheus.yml file"
+
+sudo vim /etc/prometheus/prometheus.yml
+
+touch /etc/prometheus/prometheus.yml
+
+cat >>/etc/prometheus/prometheus.yml<<EOF
+global:
+  scrape_interval: 10s
+
+scrape_configs:
+  - job_name: 'prometheus_master'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9283'] 
+EOF
+
+# [TASK 26] Change the ownership of the file
+
+###
+
+sudo chown prometheus:prometheus /etc/prometheus/prometheus.yml
+
+###
+
+# [TASK 27] Configure the Prometheus Service File
+
+cat >>/etc/systemd/system/prometheus.service<<EOF
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+--config.file /etc/prometheus/prometheus.yml \
+--storage.tsdb.path /var/lib/prometheus/ \
+--web.console.templates=/etc/prometheus/consoles \
+--web.console.libraries=/etc/prometheus/console_libraries
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# [TASK 28] Reload the systemd service.
+
+sudo systemctl daemon-reload
+
+###
+
+# [TASK 29] Start the Prometheus service
+
+sudo systemctl start prometheus
+
+###
+
+# [TASK 30]  Check service status
+
+systemctl status prometheus
+
+###
+
+# [TASK 31] Check service status
+
+systemctl status prometheus
+
+
+
+# [TASK 32] Installing grafana
+
+sudo vim /etc/yum.repos.d/grafana.repo
+
+cat >>/etc/yum.repos.d/grafana.repo<<EOF
+[grafana]
+name=grafana
+baseurl=https://packages.grafana.com/oss/rpm
+repo_gpgcheck=1
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.grafana.com/gpg.key
+sslverify=1
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+EOF
+
+sudo yum install grafana -y
+
+sudo yum install fontconfig -y
+sudo yum install freetype* -y 
+sudo yum install urw-fonts -y
+
+###
+
+echo "[TASK 33] Start service"
+
+sudo systemctl start grafana-server
+
+sudo systemctl enable grafana-server.service
+
+###
+
+echo "[TASK 34] Mgr enable dashboard"
+
+sudo ceph mgr module enable dashboard --force
+
+###
+
+echo "[TASK 35] Mgr enable Prometheus"
+
+sudo ceph mgr module enable prometheus --force
+
+###
+
+echo "[TASK 36] Edit the ceph.conf"
+
+cat >>~/ceph-deploy/ceph.conf<<EOF
+
+[mon]
+        mgr initial modules = dashboard
+EOF
+
+###
+
+echo "[TASK 37] Check Mgr Services"
+
+sudo ceph mgr services
+sudo ceph mgr services
+
+
+

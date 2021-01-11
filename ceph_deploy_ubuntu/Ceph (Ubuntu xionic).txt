@@ -1,0 +1,86 @@
+1. Use Ubuntu xenial (18) (doesn't work on Ubuntu 20)
+
+2.create cephuser
+
+# useradd -m -s /bin/bash cephuser
+# passwd cephuser
+# echo "cephuser ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
+# chmod 0440 /etc/sudoers.d/cephuser
+# sed -i s'/Defaults requiretty/#Defaults requiretty'/g /etc/sudoers
+
+3.install NTp for time control
+
+# sudo apt-get install -y ntp ntpdate ntp-doc
+# systemctl enable ntp
+# systemctl start ntp
+
+4. add hosts (for all nodes)
+
+# vim /etc/hosts
+
+5. create a configuration file for the ssh config
+
+# vim ~/.ssh/config (for main node)
+
+Example:
+
+Host qztst-kubeceph-1
+        Hostname qztst-kubeceph-1
+        User cephuser
+ 
+Change the permission of the config file to 644.
+
+# chmod 644 ~/.ssh/config 
+
+
+6. Install ceph (each node)
+
+# wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add -
+# echo deb https://download.ceph.com/debian-luminous/ $(lsb_release -sc) main | tee /etc/apt/sources.list.d/ceph.list
+# apt update && apt install ceph-common -y
+# modprobe rbd
+
+7. create config folder from main node
+
+# mkdir configs && cd configs
+
+8. init from main node
+
+#ceph-deploy new main-node node-2 node-3
+#cat ceph.conf
+
+9. install reqs from main node
+
+# ceph-deploy install --release luminous main-bode node-2 node-3
+
+10. monitors start from main-node
+
+# ceph-deploy mon create-initial
+
+11. copy config to all nodes from main node
+
+# ceph-deploy admin main-node node-2 node-3
+
+12. get status from main-node
+
+# ceph status
+
+13. start managers from main node
+
+# ceph-deploy mgr create main-node node-2 node-3
+
+14. get status from main node
+
+# ceph status
+
+15. get disks from main node
+
+# ssh cephuser@main-node 'sudo fdisk -l' && ssh cephuser@node-2 'sudo fdisk -l' && ssh cephuser@node-3 'sudo fdisk -l'
+
+# start OSD from main node
+ceph-deploy osd create --data /dev/sdc main-node   (or vdc)
+ceph-deploy osd create --data /dev/sdc node-2	   (or vdc)	
+ceph-deploy osd create --data /dev/sdc node-3	   (or vcd)
+	
+# get status from main node
+ceph status

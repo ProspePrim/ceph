@@ -1,0 +1,57 @@
+Ubuntu bionic (18)
+
+1. add hosts (for all nodes)
+
+# vim /etc/hosts
+
+2. Install ceph (each node)
+
+# wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add -
+# echo deb https://download.ceph.com/debian-luminous/ $(lsb_release -sc) main | tee /etc/apt/sources.list.d/ceph.list
+# apt update && apt install ceph-common -y
+# modprobe rbd
+
+3. create config folder from main node
+
+# mkdir configs && cd configs
+
+4. init from main node
+
+#ceph-deploy new main-node node-2 node-3
+#cat ceph.conf
+
+5. install reqs from main node
+
+# ceph-deploy install --release luminous main-bode node-2 node-3
+
+6. monitors start from main-node
+
+# ceph-deploy mon create-initial
+
+7. copy config to all nodes from main node
+
+# ceph-deploy admin main-node node-2 node-3
+
+8. get status from main-node
+
+# sudo ceph status
+
+9. start managers from main node
+
+# ceph-deploy mgr create main-node node-2 node-3
+
+10. get status from main node
+
+# sudo ceph status
+
+11. get disks from main node
+
+# ssh cephuser@main-node 'sudo fdisk -l' && ssh cephuser@node-2 'sudo fdisk -l' && ssh cephuser@node-3 'sudo fdisk -l'
+
+# start OSD from main node
+ceph-deploy osd create --data /dev/sdc main-node   (or vdc)
+ceph-deploy osd create --data /dev/sdc node-2   (or vdc)
+ceph-deploy osd create --data /dev/sdc node-3   (or vcd)
+
+12. get status from main node
+# sudo ceph status

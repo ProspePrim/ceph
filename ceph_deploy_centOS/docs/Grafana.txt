@@ -1,0 +1,153 @@
+# [TASK 14] Installing prometheus
+
+sudo wget https://github.com/prometheus/prometheus/releases/download/v2.8.1/prometheus-2.8.1.linux-amd64.tar.gz
+
+# [TASK 15] Add a Prometheus user.
+
+sudo useradd --no-create-home --shell /bin/false prometheus
+
+# [TASK 16] Create needed directories
+
+sudo mkdir /etc/prometheus
+sudo mkdir /var/lib/prometheus
+
+# [TASK 17] Change the owner of the above directories.
+
+sudo chown prometheus:prometheus /etc/prometheus
+sudo chown prometheus:prometheus /var/lib/prometheus
+
+# [TASK 18] Now go to Prometheus downloaded location and extract it.
+
+sudo tar -xvzf prometheus-2.8.1.linux-amd64.tar.gz
+
+# [TASK 19] Rename it as per your preference.
+
+sudo mv prometheus-2.8.1.linux-amd64 prometheuspackage
+
+# [TASK 20] Copy “prometheus” and “promtool” binary from the “prometheuspackage” folder to “/usr/local/bin”.
+
+sudo cp prometheuspackage/prometheus /usr/local/bin/
+sudo cp prometheuspackage/promtool /usr/local/bin/
+
+# [TASK 21] Change the ownership to Prometheus user.
+
+sudo chown prometheus:prometheus /usr/local/bin/prometheus
+sudo chown prometheus:prometheus /usr/local/bin/promtool
+
+# [TASK 22] Change the ownership to Prometheus user
+
+sudo cp -r prometheuspackage/consoles /etc/prometheus
+sudo cp -r prometheuspackage/console_libraries /etc/prometheus
+
+# [TASK 23] Create the prometheus.yml file.
+
+sudo vim /etc/prometheus/prometheus.yml
+
+---
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'ceph'
+    static_configs:
+      - targets: ['localhost:9283']
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['localhost:9100']
+---
+
+# [TASK 24] Change the ownership of the file
+
+sudo chown prometheus:prometheus /etc/prometheus/prometheus.yml
+
+# [TASK 25] Configure the Prometheus Service File
+
+sudo vim /etc/systemd/system/prometheus.service
+
+---
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+--config.file /etc/prometheus/prometheus.yml \
+--storage.tsdb.path /var/lib/prometheus/ \
+--web.console.templates=/etc/prometheus/consoles \
+--web.console.libraries=/etc/prometheus/console_libraries
+
+[Install]
+WantedBy=multi-user.target
+
+---
+
+# [TASK 26] Reload the systemd service.
+
+sudo systemctl daemon-reload
+
+# [TASK 27] Start the Prometheus service
+
+sudo systemctl start prometheus
+
+# [TASK 28]  Check service status
+
+systemctl status prometheus
+
+# [TASK 29] Check service status
+
+systemctl status prometheus
+
+
+
+# [TASK 30] Installing grafana
+
+sudo vim /etc/yum.repos.d/grafana.repo
+
+
+
+----
+[grafana]
+name=grafana
+baseurl=https://packages.grafana.com/oss/rpm
+repo_gpgcheck=1
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.grafana.com/gpg.key
+sslverify=1
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+----
+
+sudo yum install grafana -y
+
+sudo yum install fontconfig
+sudo yum install freetype*
+sudo yum install urw-fonts
+
+# [TASK 31] Start service
+
+sudo systemctl status grafana-server
+
+sudo systemctl start grafana-server
+
+sudo systemctl enable grafana-server.service
+
+# [TASK 32] Add Prometheus as data source to Grafana using the Grafana Web UI
+
+1. Click on Configuration > Data Sources
+2. Click Add data source and you will come to the settings page of your new data source.
+3. In the Name box, enter a name for this data source.
+4. Click Create > Import
+5. in "Import via grafana.com" add 7056 and "load"
+6. in "CephPrometheus" choose "Prometheus" and "Import"
+
+# Links:
+
+1. https://docs.ceph.com/en/latest/mgr/dashboard/
+2. https://grafana.com/docs/grafana/latest/datasources/add-a-data-source/
