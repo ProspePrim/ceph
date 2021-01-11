@@ -32,7 +32,6 @@ priority=2
 gpgcheck=1
 gpgkey=https://download.ceph.com/keys/release.asc
 EOF
-
 ###
 
 echo "[TASK 3]  Create dir ceph-deploy"
