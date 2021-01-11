@@ -9,7 +9,7 @@ echo "[TASK 2]  ssh-config"
 cat >>~/.ssh/config<<EOF
 Host ceph-node-1
         Hostname ceph-node-1
-        User root
+        User root 
 
 Host ceph-node-2
         Hostname ceph-node-2

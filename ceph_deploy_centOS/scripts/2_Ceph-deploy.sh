@@ -48,7 +48,7 @@ sudo yum install ceph-deploy
 
 ###
 
-echo "[TASK 5] Start to create the cluster
+echo "[TASK 5] Start to create the cluster"
 
 ceph-deploy new ceph-node-1 ceph-node-2 ceph-node-3
 
