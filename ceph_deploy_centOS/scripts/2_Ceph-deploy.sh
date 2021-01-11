@@ -50,46 +50,46 @@ sudo yum install ceph-deploy
 
 echo "[TASK 5] Start to create the cluster"
 
-ceph-deploy new ceph-node-1 ceph-node-2 ceph-node-3 -y
+sudo ceph-deploy new ceph-node-1 ceph-node-2 ceph-node-3 -y
 
 ###
 
 echo "[TASK 6] Install Ceph packages"
 
-ceph-deploy install --release nautilus ceph-node-1 ceph-node-2 ceph-node-3
+sudo ceph-deploy install --release nautilus ceph-node-1 ceph-node-2 ceph-node-3
 
 ###
 
 echo "[TASK 7] Deploy the initial monitor(s) and gather the keys"
 
-ceph-deploy mon create-initial
+sudo ceph-deploy mon create-initial
 
 ###
 
 echo "[TASK 8] Copy the configuration file and admin key to your admin node and your Ceph Nodes"
 
-ceph-deploy admin ceph-node-1 ceph-node-2 ceph-node-3
+sudo ceph-deploy admin ceph-node-1 ceph-node-2 ceph-node-3
 
 ###
 
 echo "[TASK 9] Deploy a manager daemon"
 
-ceph-deploy mgr create ceph-node-1
+sudo ceph-deploy mgr create ceph-node-1
 
 ###
 
 echo "[TASK 10] create metadata servers"
 
-ceph-deploy mds create ceph-node-1 ceph-node-2 ceph-node-3
+sudo ceph-deploy mds create ceph-node-1 ceph-node-2 ceph-node-3
 
 ###
 
 echo "[TASK 11] Create Object Store Daemons (OSDs)"
 
-ceph-deploy osd create --data /dev/sdb ceph-node-1
-ceph-deploy osd create --data /dev/sdb ceph-node-2
-ceph-deploy osd create --data /dev/sdb ceph-node-3
+sudo ceph-deploy osd create --data /dev/sdb ceph-node-1
+sudo ceph-deploy osd create --data /dev/sdb ceph-node-2
+sudo ceph-deploy osd create --data /dev/sdb ceph-node-3
 
 echo "[TASK 12] Check status"
 
-ceph -s
+sudo ceph -s
