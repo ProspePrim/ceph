@@ -9,21 +9,21 @@ echo "[TASK 2]  ssh-config"
 cat >>~/.ssh/config<<EOF
 Host ceph-node-1
         Hostname ceph-node-1
-        User root 
+        User vagrant 
 
 Host ceph-node-2
         Hostname ceph-node-2
-        User root
+        User vagrant
 
 Host ceph-node-3
         Hostname ceph-node-3
-        User root
+        User vagrant
 EOF
 
 chmod 600 ~/.ssh/config
 
 
 echo "[TASK 3]  ssh-copy-id"
-ssh-copy-id root@ceph-node-1 
-ssh-copy-id root@ceph-node-2
-ssh-copy-id root@ceph-node-3
+ssh-copy-id vagrant@ceph-node-1 
+ssh-copy-id vagrant@ceph-node-2
+ssh-copy-id vagrant@ceph-node-3
