@@ -67,13 +67,18 @@ touch /etc/prometheus/prometheus.yml
 
 cat >>/etc/prometheus/prometheus.yml<<EOF
 global:
-  scrape_interval: 10s
+  scrape_interval: 5s
 
 scrape_configs:
-  - job_name: 'prometheus_master'
-    scrape_interval: 5s
+  - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9283'] 
+      - targets: ['localhost:9090']
+  - job_name: 'ceph'
+    static_configs:
+      - targets: ['localhost:9283']
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['localhost:9100']
 EOF
 
 ###

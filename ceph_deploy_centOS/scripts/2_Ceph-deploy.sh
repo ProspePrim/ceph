@@ -41,7 +41,7 @@ mkdir ~/ceph-deploy
 cd ~/ceph-deploy
 
 ###
-
+vagrant
 echo "[TASK 4]  Install Ceph-Deploy"
 
 sudo yum install ceph-deploy
@@ -50,7 +50,7 @@ sudo yum install ceph-deploy
 
 echo "[TASK 5] Start to create the cluster"
 
-sudo ceph-deploy new ceph-node-1 ceph-node-2 ceph-node-3 -y
+sudo ceph-deploy new ceph-node-1 ceph-node-2 ceph-node-3 
 
 ###
 
