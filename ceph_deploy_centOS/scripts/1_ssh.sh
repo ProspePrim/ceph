@@ -9,15 +9,15 @@ echo "[TASK 2]  ssh-config"
 cat >>~/.ssh/config<<EOF
 Host ceph-node-1
         Hostname ceph-node-1
-        User vagrant 
+        User root
 
 Host ceph-node-2
         Hostname ceph-node-2
-        User vagrant
+        User root
 
 Host ceph-node-3
         Hostname ceph-node-3
-        User vagrant
+        User root
 EOF
 
 chmod 600 ~/.ssh/config
