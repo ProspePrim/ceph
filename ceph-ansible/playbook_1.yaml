@@ -1,0 +1,45 @@
+---
+
+- hosts: all
+  tasks:
+
+    - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+      shell: |
+        swapoff -a
+      become: true
+
+    - name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+        replace: '# \1'
+        backup: yes
+
+    - name: Stop and disable firewalld.
+      service:
+        name: firewalld
+        state: stopped
+        enabled: False
+
+    - name: Install libselinux as prerequisite for SELinux Ansible module
+      yum:
+        name: "{{item}}"
+        state: latest
+      with_items:
+        - libselinux-python
+        - libsemanage-python
+
+    - name: Disable SELinux at next reboot
+      selinux:
+        state: disabled
+      become: yes
+
+    - name: Set SELinux in permissive mode until the machine is rebooted
+      command: setenforce 0
+      ignore_errors: true
+      changed_when: false
+      become: yes
+
+    - name: Rebooting the cloud server/bare metal box
+      become: true
+      reboot:
