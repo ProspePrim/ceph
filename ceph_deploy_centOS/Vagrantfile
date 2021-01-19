@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
     cn1.vm.hostname = "ceph-node-1"
     cn1.vm.box = "geerlingguy/centos7"
     cn1.vm.network :private_network, ip: "172.16.3.21"
-    cn1.newdisk.size = 200 * 1024 # size in megabytes
+    cn1.newdisk.size = 100 * 1024 # size in megabytes
     cn1.newdisk.path = "ceph-node-1.vdi"
     
     
@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
     cn2.vm.hostname = "ceph-node-2"
     cn2.vm.box = "geerlingguy/centos7"
     cn2.vm.network :private_network, ip: "172.16.3.22"
-    cn2.newdisk.size = 200 * 1024 # size in megabytes
+    cn2.newdisk.size = 100 * 1024 # size in megabytes
     cn2.newdisk.path = "ceph-node-2.vdi"    
     
     config.vm.provider :virtualbox do |v|
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
     cn3.vm.hostname = "ceph-node-3"
     cn3.vm.box = "geerlingguy/centos7"
     cn3.vm.network :private_network, ip: "172.16.3.23"
-    cn3.newdisk.size = 200 * 1024 # size in megabytes
+    cn3.newdisk.size = 100 * 1024 # size in megabytes
     cn3.newdisk.path = "ceph-node-3.vdi" 
     
     
