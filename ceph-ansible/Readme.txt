@@ -1,5 +1,7 @@
 # Instruction
 
+ansible-playbook -u root -k -i hosts -b --diff playbook_1.yaml
+
 ### ssh to node-1
 
 sudo yum install epel-release
@@ -10,9 +12,13 @@ sudo pip install -r requirements.txt
 
 pip install notario
 
+mv 
+
 chmod +x _start_.sh 
 
-./_start
+mv site.yml.sample site.yml
+
+./_start_.sh
 
 # Links:
 
