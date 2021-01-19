@@ -1,0 +1,19 @@
+[mons]
+ceph-node-11 monitor_address=172.16.3.41
+ceph-node-12 monitor_address=172.16.3.42
+ceph-node-13 monitor_address=172.16.3.43
+
+[osds]
+ceph-node-11
+ceph-node-12
+ceph-node-13
+
+[mgrs]
+ceph-node-11
+ceph-node-12
+ceph-node-13
+
+[mdss]
+ceph-node-11
+ceph-node-12
+ceph-node-13

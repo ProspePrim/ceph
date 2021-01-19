@@ -1,0 +1,10 @@
+[mons]
+mon0
+mon1
+mon2
+
+[mgrs]
+mon0
+
+[osds]
+osd0
