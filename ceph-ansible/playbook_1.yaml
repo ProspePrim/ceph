@@ -28,7 +28,6 @@
       with_items:
         - libselinux-python
         - libsemanage-python
-      become: true
 
     - name: Disable SELinux at next reboot
       selinux:
