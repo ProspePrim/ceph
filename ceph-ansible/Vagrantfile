@@ -1,62 +1,42 @@
+#Количество нод, не должно быть кратно 2.
+NodeCount = 3
+
+#Кол-во ГБ на нодах
+VolumeSize = 200
+
+#Кол-во ОЗУ
+MemorySize = 2048
+
+#Кол-во ЦПУ
+CpuSize = 1
+
+
 Vagrant.configure("2") do |config|
   config.ssh.insert_key = false
 
   # ceph-node-1.
-  config.vm.define "ceph-node-11" do |cn1|
-    cn1.vm.hostname = "ceph-node-11"
+  (1..NodeCount).each do |i|
+  config.vm.define "ceph-node-#{i}" do |cn1|
+    cn1.vm.hostname = "ceph-node-#{i}"
     cn1.vm.box = "geerlingguy/centos7"
-    cn1.vm.network :private_network, ip: "172.16.3.41"
-    cn1.newdisk.size = 100 * 1024 # size in megabytes
-    cn1.newdisk.path = "ceph-node-11.vdi"
-    
-    
+    cn1.vm.network :private_network, ip: "172.16.2.1#{i}"
+    cn1.newdisk.size = MemorySize * 1024 # size in megabytes
+    cn1.newdisk.path = "ceph-node-#{i}.vdi"
+        
     config.vm.provider :virtualbox do |v|
       v.gui = false
-      v.memory = 2048
-      v.cpus = 1
+      v.memory = GpuSize
+      v.cpus = CpuSize
       
     end
   end
 
-  # ceph-node-2.
-  config.vm.define "ceph-node-12" do |cn2|
-    cn2.vm.hostname = "ceph-node-12"
-    cn2.vm.box = "geerlingguy/centos7"
-    cn2.vm.network :private_network, ip: "172.16.3.42"
-    cn2.newdisk.size = 100 * 1024 # size in megabytes
-    cn2.newdisk.path = "ceph-node-12.vdi"    
-    
-    config.vm.provider :virtualbox do |v|
-      v.gui = false
-      v.memory = 2048
-      v.cpus = 1
-      
-    end
-  end
-
-  # ceph-node-3.
-  config.vm.define "ceph-node-13" do |cn3|
-    cn3.vm.hostname = "ceph-node-13"
-    cn3.vm.box = "geerlingguy/centos7"
-    cn3.vm.network :private_network, ip: "172.16.3.43"
-    cn3.newdisk.size = 100 * 1024 # size in megabytes
-    cn3.newdisk.path = "ceph-node-13.vdi" 
-    
-    
-    config.vm.provider :virtualbox do |v|
-      v.gui = false
-      v.memory = 2048
-      v.cpus = 1
-      
-    end
-  end
-
-  # Python3 for ansible
+    # Python3 for ansible
 
     config.vm.provision "shell", inline: <<-SHELL
         yum update
         yum -y install python 2
-        yum -y install ansible-2.6.2 sshpass git
+        yum -y sshpass git
         
      SHELL
     config.vm.provision "shell", path: "bootstrap_ceph.sh"
